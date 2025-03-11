@@ -1,0 +1,24 @@
+name: sync-fork
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch: { }
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          path: src/github.com/plejd/nats-io-natscli
+          ref: ${{ inputs.target || 'main' }}
+          fetch-depth: 0
+          fetch-tags: true
+      - name: Sync with upstream
+        working-directory: src/github.com/plejd/nats-io-natscli
+        run: gh repo sync -b $BRANCH_NAME
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          BRANCH_NAME: main
